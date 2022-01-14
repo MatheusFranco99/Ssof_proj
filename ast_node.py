@@ -10,6 +10,11 @@ class Module:
     def eval(self):
         print("Module")
         print(self.body)
+    
+    def show(self, tab = 0):
+        print(tab*'\t',"Module:")
+        for elm in self.body:
+            elm.show(tab+1)
 
 class Expr:
     def __init__(self, value):
@@ -18,6 +23,10 @@ class Expr:
     def eval(self):
         print("Expr")
         print(self.value)
+    
+    def show(self,tab):
+        print(tab*'\t',"Expression:")
+        self.value.show(tab+1)
 
 class Call:
     def __init__(self, args, func):
@@ -31,6 +40,14 @@ class Call:
         print("Call")
         print(self.args)
         print(self.func)
+    
+    def show(self, tab):
+        print(tab*'\t',"Call:")
+        print((tab+1)*'\t',"Func:",)
+        self.func.show(tab+2)
+        print((tab+1)*'\t',"Args:",)
+        for elm in self.args:
+            elm.show(tab+2)
 
 class Assign:
     def __init__(self, targets, value):
@@ -44,6 +61,12 @@ class Assign:
         print("Assign")
         print(self.targets)
         print(self.value)
+    
+    def show(self,tab):
+        print(tab*'\t',"Assing:")
+        for elm in self.targets:
+            elm.show(tab+1)
+        self.value.show(tab+1)
 
 class If:
     def __init__(self, test, body, orelse):
@@ -63,6 +86,14 @@ class If:
         print(self.body)
         print(self.orelse)
 
+    def show(self,tab):
+        print(tab*'\t',"If:")
+        self.test.show(tab+1)
+        for elm in self.body:
+            elm.show(tab+1)
+        for elm in self.orelse:
+            elm.show(tab+1)
+
 class While:
     def __init__(self, test, body, orelse):
         self.test = construct(test)
@@ -80,8 +111,31 @@ class While:
         print(self.test)
         print(self.body)
         print(self.orelse)
+    
+    def show(self,tab):
+        print(tab*'\t',"While:")
+        self.test.show(tab+1)
+        for elm in self.body:
+            elm.show(tab+1)
+        for elm in self.orelse:
+            elm.show(tab+1)
 
-#DO COMPARE!!!
+class Compare:
+    def __init__(self, left, comparators):
+        self.left = construct(left)
+        lst = []
+        for elem in comparators:
+            lst.append(construct(elem))
+        self.comparators = lst
+    def eval(self):
+        pass
+
+    def show(self,tab):
+        print(tab*'\t',"Compare:")
+        self.left.show(tab+1)
+        for elm in self.comparators:
+            elm.show(tab+1)
+
 
 class BinOp:
     def __init__(self, left, right):
@@ -92,6 +146,11 @@ class BinOp:
         print("BinOp")
         print(self.left)
         print(self.right)
+    
+    def show(self,tab):
+        print(tab*'\t',"BinOp:")
+        self.left.show(tab+1)
+        self.right.show(tab+1)
 
 class Attribute:
     def __init__(self, value, attr):
@@ -102,6 +161,11 @@ class Attribute:
         print("Attribute")
         print(self.value)
         print(self.attr)
+    
+    def show(self,tab):
+        print(tab*'\t',"Attribute:")
+        self.value.show(tab+1)
+        print((tab+1)*'\t',"attr:",self.attr)
 
 
 class Constant:
@@ -111,6 +175,10 @@ class Constant:
     def eval(self):
         print("Constant")
         print(self.value)                #Not node
+    
+    def show(self,tab):
+        print(tab*'\t',"Constant:",self.value)
+
 
 class Name:
     def __init__(self, id):
@@ -119,6 +187,9 @@ class Name:
     def eval(self):
         print("Name")
         print(self.id)                #Not node
+    
+    def show(self,tab):
+        print(tab*'\t',"Name:",self.id)
 
 def construct(node):
     if node["ast_type"] == "Module":
@@ -133,6 +204,8 @@ def construct(node):
         return If(node["test"], node["body"], node["orelse"])
     elif node["ast_type"] == "While":
         return While(node["test"], node["body"], node["orelse"])
+    elif node["ast_type"] == "Compare":
+        return Compare(node["left"], node["comparators"])
     elif node["ast_type"] == "BinOp":
         return BinOp(node["left"], node["right"])
     elif node["ast_type"] == "Attribute":
@@ -144,4 +217,3 @@ def construct(node):
     else:
         sys.stderr.write("Invalid node\n")
         sys.exit(1)
-

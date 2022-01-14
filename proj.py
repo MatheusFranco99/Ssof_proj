@@ -57,6 +57,8 @@ if __name__ == '__main__':
 
     ast = construct(json_dicti)
 
+    ast.show()
+
     """tree = ast.parse(text)
     for node in ast.walk(tree):
         print(node.ast_type)
