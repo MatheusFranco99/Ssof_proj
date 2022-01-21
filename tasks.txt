@@ -1,0 +1,13 @@
+
+
+Resolver sanitizer
+
+Attr
+
+if
+while
+
+compare
+
+
+transformar o output como deve ser
