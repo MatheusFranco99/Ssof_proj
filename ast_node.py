@@ -43,12 +43,12 @@ output = []
 
 def create_output_case(name,source, sink, unsanitized, sanitizers):
     global output
-    output += [{'name': name, 'source': source, 'sink': sink, 'unsanitized': unsanitized, 'sanitizers': [sanitizers]}]
+    output += [{'name': name, 'source': source, 'sink': sink, 'unsanitized': unsanitized, 'sanitizers': [sanitizers.copy()]}]
 
 def add_output(vuln_case, vuln_pattern,sink):
     name = vuln_pattern.name
     source = vuln_case['source']
-    sanitizers = vuln_case['sanitizers']
+    sanitizers = vuln_case['sanitizers'].copy()
     unsanitized = 'yes'
     if sanitizers != []:
         unsanitized = 'no'
@@ -74,12 +74,12 @@ def is_special_vuln(vuln_case):
     return vuln_case['name'] == 'especial_vuln_case'
        
 def create_special_vuln_case(source,sanitizers):
-    return {'name': 'especial_vuln_case', 'source': source, 'sanitizers': sanitizers, 'implicit': 'yes'}
+    return {'name': 'especial_vuln_case', 'source': source, 'sanitizers': sanitizers.copy(), 'implicit': 'yes'}
      
 def create_vuln_case(name,source,sanitizers,implicit):
-    return {'name': name, 'source': source, 'sanitizers': sanitizers, 'implicit': implicit}
+    return {'name': name, 'source': source, 'sanitizers': sanitizers.copy(), 'implicit': implicit}
 
-def add_sanitizer(vuln_case,sanitizer):
+def add_sanitizer(vuln_case,sanitizer: str):
     vuln_case['sanitizers'] += [sanitizer]
     return vuln_case
 
@@ -149,9 +149,6 @@ class Expr:
         self.value.analyse()
         
         table[self] = table[self.value].copy()
-        print("table:\n")
-        for elm in table:
-            print("\t",elm,table[elm])
     
     def getnames(self):
         return self.value.getnames()
@@ -228,9 +225,11 @@ class Call:
                 print("\t\t\toutputs:")
                 for outt in output:
                     print("\t\t\t\t",outt)
-                for vuln_case in table[self]:
-                    if is_instance_vuln(vuln_case,vuln[vuln_pattern]):
-                        add_sanitizer(vuln_case,self.func.id)
+                for i in range(len(table[self])):
+                    if is_instance_vuln(table[self][i],vuln[vuln_pattern]):
+                        #add_sanitizer(vuln_case,self.func.id)
+                        if self.func.id not in table[self][i]['sanitizers']:
+                            table[self][i]['sanitizers'] += [self.func.id]
         
 
         
