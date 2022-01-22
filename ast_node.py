@@ -229,7 +229,7 @@ class Call:
                     if is_instance_vuln(table[self][i],vuln[vuln_pattern]):
                         #add_sanitizer(vuln_case,self.func.id)
                         if self.func.id not in table[self][i]['sanitizers']:
-                            table[self][i]['sanitizers'] += [self.func.id]
+                            table[self][i]['sanitizers'] = table[self][i]['sanitizers'].copy() + [self.func.id]
         
 
         
@@ -436,19 +436,19 @@ class BinOp:
 class Attribute:
     def __init__(self, value, attr):
         self.value = construct(value)
-        self.attr = attr              #Not node
+        self.id = attr              #Not node   #self.attr = self.id
         self.tainted = False
         self.own_vuln = 0
 
     def eval(self):
         print("Attribute")
         print(self.value)
-        print(self.attr)
+        print(self.id)
     
     def show(self,tab):
         print(tab*'\t',"Attribute:")
         self.value.show(tab+1)
-        print((tab+1)*'\t',"attr:",self.attr)
+        print((tab+1)*'\t',"attr:",self.id)
     
     def analyse(self):
         return

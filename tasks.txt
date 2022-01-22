@@ -1,8 +1,8 @@
 
 
-Resolver sanitizer
+Resolver sanitizer   #feito
 
-Attr
+Attr                 #feito
 
 if
 while
@@ -10,4 +10,4 @@ while
 compare
 
 
-transformar o output como deve ser
+transformar o output como deve ser    #feito

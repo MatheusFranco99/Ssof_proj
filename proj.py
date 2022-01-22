@@ -22,6 +22,26 @@ from ast_node import *
 #         text += "\nimplicit: " + self.implicit
 #         return text
 
+def process_output(output):
+    processed_output = []
+    cont = {}
+    for flow in output:
+        vuln = flow["name"]
+        if flow["name"] in cont.keys():
+            cont[flow["name"]] += 1
+            vuln += "_" + str(cont[flow["name"]])
+        else:
+            vuln += "_1"
+            cont[flow["name"]] = 1
+        source = flow["source"]
+        sink = flow["sink"]
+        option = flow["unsanitized"]
+        sanitized = flow["sanitizers"]
+        sanitized = [ele for ele in sanitized if ele != []]
+        processed_output += [{"vulnerability": vuln, "source": source, "sink": sink, "unsanitized flows": option, "sanitized flows": sanitized}]
+    for out in processed_output:
+        print(out)
+
 
 def usage():
     sys.stderr.write('Usage: python3 proj.py program.json patterns.json\n')
@@ -87,6 +107,8 @@ if __name__ == '__main__':
     print("##############################################################################################")
     for outt in output:
         print(outt)
+    print("##############################################################################################")
+    process_output(output)
 
     """tree = ast.parse(text)
     for node in ast.walk(tree):
