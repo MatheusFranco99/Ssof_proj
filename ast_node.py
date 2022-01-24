@@ -121,7 +121,7 @@ def create_vuln_case(name,source,sanitizers,implicit):
     return {'name': name, 'source': source, 'sanitizers': sanitizers.copy(), 'implicit': implicit}
 
 def add_sanitizer(vuln_case,sanitizer: str):
-    vuln_case['sanitizers'] += [sanitizer]
+    vuln_case['sanitizers'] = vuln_case['sanitizers']+[sanitizer]
     return vuln_case
 
 def is_instance_vuln(vuln_case,vuln_pattern):
@@ -663,7 +663,21 @@ class While:
             elm.analyse()
         # run orelse enquanto tabela de variaveis mudar
         while (table_before != table):
+
+            difs = []
+            for elm in table:
+                if elm not in table_before:
+                    difs += []
+            for elm in table_before:
+                if elm not in table:
+                    difs += []
+        
+            if(difs == []):
+                break
+
             table_before = table.copy()
+
+
             # recalcula vuln implicitas no test (caso em que variaveis do compare sao mudadas no body)
             test_names = self.test.get_leftnames()
             for name in test_names:
