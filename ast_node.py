@@ -287,12 +287,13 @@ class Assign:
         print("leftnames:",leftnames)
 
         for name in leftnames:
-            if name not in table:
-                table[name] = table[self.value]
-            else:
-                for elm in table[self.value]:
-                    if elm not in table[name]:
-                        table[name] += [elm.copy()]
+            table[name] = table[self.value]
+            # if name not in table:
+            #     table[name] = table[self.value]
+            # else:
+            #     for elm in table[self.value]:
+            #         if elm not in table[name]:
+            #             table[name] += [elm.copy()]
         
         # if IMPLICIT_PROPAGATION in table:
         #     for name in leftnames:
@@ -453,6 +454,8 @@ class While:
 
         for elm in self.body:
             elm.analyse()
+        for elm in self.body:
+            elm.analyse()
         
         previous_table = table_stack.pop()
         table_stack.append(previous_table)
@@ -460,6 +463,8 @@ class While:
 
         table = previous_table.copy()
 
+        for elm in self.orelse:
+            elm.analyse()
         for elm in self.orelse:
             elm.analyse()
         
