@@ -56,6 +56,14 @@ table_stack = []
 
 IMPLICIT_PROPAGATION = 'IMPLICIT_PROPAGATION'
 
+def print_console(*argv):
+    # uniq = ""
+    # for arg in argv:
+    #     uniq += str(arg) + " "
+    # uniq = uniq[:-1]
+    # print(uniq)
+    pass
+
 def create_output_case(name,source, sink, unsanitized, sanitizers):
     global output
     if sanitizers == []:
@@ -122,11 +130,11 @@ class Module:
         
 
     def eval(self):
-        print("Module")
-        print(self.body)
+        print_console("Module")
+        print_console(self.body)
     
     def show(self, tab = 0):
-        print(tab*'\t',"Module:")
+        print_console(tab*'\t',"Module:")
         for elm in self.body:
             elm.show(tab+1)
     
@@ -162,17 +170,19 @@ class Expr:
         self.own_vuln = 0
 
     def eval(self):
-        print("Expr")
-        print(self.value)
+        print_console("Expr")
+        print_console(self.value)
     
     def show(self,tab):
-        print(tab*'\t',"Expression:")
+        print_console(tab*'\t',"Expression:")
         self.value.show(tab+1)
 
+    def get_leftnames(self):
+        return self.value.get_leftnames()
 
     def analyse(self):
         
-        print(bcolors.OKBLUE+"Expr node:"+bcolors.ENDC)
+        print_console(bcolors.OKBLUE+"Expr node:"+bcolors.ENDC)
         global names,table,output
         self.value.analyse()
         
@@ -193,15 +203,19 @@ class Call:
         self.own_vuln = 0
 
     def eval(self):
-        print("Call")
-        print(self.args)
-        print(self.func)
+        print_console("Call")
+        print_console(self.args)
+        print_console(self.func)
     
+    def get_leftnames(self):
+        return []
+
+
     def show(self, tab):
-        print(tab*'\t',"Call:")
-        print((tab+1)*'\t',"Func:",)
+        print_console(tab*'\t',"Call:")
+        print_console((tab+1)*'\t',"Func:",)
         self.func.show(tab+2)
-        print((tab+1)*'\t',"Args:",)
+        print_console((tab+1)*'\t',"Args:",)
         for elm in self.args:
             elm.show(tab+2)
     
@@ -209,7 +223,7 @@ class Call:
 
         global vuln
         
-        print(bcolors.OKBLUE + "Call node:" + bcolors.ENDC)
+        print_console(bcolors.OKBLUE + "Call node:" + bcolors.ENDC)
         for elm in self.args:
             elm.analyse()
 
@@ -246,13 +260,13 @@ class Call:
         
 
         
-        print("table:")
+        print_console("table:")
         for elm in table:
-            print("\t",elm,table[elm])
-        print("outputs:")
+            print_console("\t",elm,table[elm])
+        print_console("outputs:")
         for outt in output:
-            print("\t",outt)
-        print(bcolors.OKBLUE + "---------------------------------------" + bcolors.ENDC)
+            print_console("\t",outt)
+        print_console(bcolors.OKBLUE + "---------------------------------------" + bcolors.ENDC)
         
 
 class Assign:
@@ -266,25 +280,35 @@ class Assign:
         self.own_vuln = 0
 
     def eval(self):
-        print("Assign")
-        print(self.targets)
-        print(self.value)
+        print_console("Assign")
+        print_console(self.targets)
+        print_console(self.value)
     
     def show(self,tab):
-        print(tab*'\t',"Assing:")
+        print_console(tab*'\t',"Assing:")
         for elm in self.targets:
             elm.show(tab+1)
         self.value.show(tab+1)
     
+    def get_leftnames(self):
+        lst = []
+        for elm in self.targets:
+            try:
+                lst += elm.get_leftnames()
+            except:
+                pass
+        return lst
+
+    
     def analyse(self):
-        print(bcolors.OKBLUE + "Assign node:" + bcolors.ENDC)
+        print_console(bcolors.OKBLUE + "Assign node:" + bcolors.ENDC)
         self.value.analyse()
 
         leftnames = []
         for elm in self.targets:
             leftnames = leftnames + elm.getnames()
 
-        print("leftnames:",leftnames)
+        print_console("leftnames:",leftnames)
 
         for name in leftnames:
             table[name] = table[self.value]
@@ -324,13 +348,13 @@ class Assign:
                             add_sanitizer(vuln_case,name)
 
     
-        print("table:")
+        print_console("table:")
         for elm in table:
-            print("\t",elm,table[elm])
-        print("Output:")
+            print_console("\t",elm,table[elm])
+        print_console("Output:")
         for outt in output:
-            print("\t",outt)
-        print(bcolors.OKBLUE + "----------------------------------------------------:" + bcolors.ENDC)
+            print_console("\t",outt)
+        print_console(bcolors.OKBLUE + "----------------------------------------------------:" + bcolors.ENDC)
 
 class If:
     def __init__(self, test, body, orelse):
@@ -347,13 +371,23 @@ class If:
         self.own_vuln = 0
     
     def eval(self):
-        print("If")
-        print(self.test)
-        print(self.body)
-        print(self.orelse)
+        print_console("If")
+        print_console(self.test)
+        print_console(self.body)
+        print_console(self.orelse)
+
+    def get_leftnames(self):
+        lst = self.test.get_leftnames()
+        for elm in self.body+self.orelse:
+            lst_elm = elm.get_leftnames()
+            for name in lst_elm:
+                if name not in lst:
+                    lst += [name]
+        return lst
+
 
     def show(self,tab):
-        print(tab*'\t',"If:")
+        print_console(tab*'\t',"If:")
         self.test.show(tab+1)
         for elm in self.body:
             elm.show(tab+1)
@@ -361,7 +395,7 @@ class If:
             elm.show(tab+1)
     
     def analyse(self):
-        print(bcolors.OKBLUE + "If node:" + bcolors.ENDC)
+        print_console(bcolors.OKBLUE + "If node:" + bcolors.ENDC)
         global table
 
         self.test.analyse()
@@ -373,6 +407,13 @@ class If:
                 table[IMPLICIT_PROPAGATION] += [elm]
     
         table_stack.append(table.copy())
+
+        body_leftnames = []
+        for elm in self.body + self.orelse:
+            lst = elm.get_leftnames()
+            for name in lst:
+                if name not in body_leftnames:
+                    body_leftnames.append(name)
 
         for elm in self.body:
             elm.analyse()
@@ -392,20 +433,37 @@ class If:
         for table_case in [table2,table3]:
             for elm in table_case:
                 if isinstance(elm,str) and elm != IMPLICIT_PROPAGATION:
+                    
                     if elm not in table:
-                        table[elm] = [create_special_vuln_case(elm,[])]
+                        # check if in both
+                        if not (elm in table2 and elm in table3):
+                            table[elm] = [create_special_vuln_case(elm,[])]
+                        else:
+                            table[elm] = []
                     for vuln_case in table_case[elm]:
                         if vuln_case not in table[elm]:
                             table[elm] += [vuln_case.copy()]
-        
-        print("table:")
+       
+        test_names = self.test.get_leftnames()
+        for name in test_names:
+            for vuln_case in table[name]:
+                if vuln_case['implicit'] == "yes" and vuln_case not in table[IMPLICIT_PROPAGATION]:
+                    table[IMPLICIT_PROPAGATION] += [vuln_case.copy()]
+
+        for name in body_leftnames:
+            for vuln in table[IMPLICIT_PROPAGATION]:
+                if vuln not in table[name]:
+                    table[name] += [vuln.copy()]
+
+
+        print_console("table:")
         for elm in table:
-            print("\t",elm,table[elm])
-        print("Output:")
+            print_console("\t",elm,table[elm])
+        print_console("Output:")
         for outt in output:
-            print("\t",outt)
+            print_console("\t",outt)
         
-        print(bcolors.OKBLUE + "----------------------------------------------------:" + bcolors.ENDC)
+        print_console(bcolors.OKBLUE + "----------------------------------------------------:" + bcolors.ENDC)
 
 
 
@@ -424,13 +482,22 @@ class While:
         self.own_vuln = 0
     
     def eval(self):
-        print("While")
-        print(self.test)
-        print(self.body)
-        print(self.orelse)
+        print_console("While")
+        print_console(self.test)
+        print_console(self.body)
+        print_console(self.orelse)
     
+    def get_leftnames(self):
+        lst = self.test.get_leftnames()
+        for elm in self.body+self.orelse:
+            lst_elm = elm.get_leftnames()
+            for name in lst_elm:
+                if name not in lst:
+                    lst += [name]
+        return lst
+
     def show(self,tab):
-        print(tab*'\t',"While:")
+        print_console(tab*'\t',"While:")
         self.test.show(tab+1)
         for elm in self.body:
             elm.show(tab+1)
@@ -439,7 +506,7 @@ class While:
     
     def analyse(self):
         
-        print(bcolors.OKBLUE + "While Node:" + bcolors.ENDC)
+        print_console(bcolors.OKBLUE + "While Node:" + bcolors.ENDC)
         global table
 
         self.test.analyse()
@@ -452,10 +519,20 @@ class While:
     
         table_stack.append(table.copy())
 
+        body_leftnames = []
+        for elm in self.body + self.orelse:
+            lst = elm.get_leftnames()
+            for name in lst:
+                if name not in body_leftnames:
+                    body_leftnames.append(name)
+
+        table_before = table.copy()
         for elm in self.body:
             elm.analyse()
-        for elm in self.body:
-            elm.analyse()
+        while (table_before != table):
+            table_before = table.copy()
+            for elm in self.body:
+                elm.analyse()
         
         previous_table = table_stack.pop()
         table_stack.append(previous_table)
@@ -463,31 +540,47 @@ class While:
 
         table = previous_table.copy()
 
+        table_before = table.copy()
         for elm in self.orelse:
             elm.analyse()
-        for elm in self.orelse:
-            elm.analyse()
+        while (table_before != table):
+            table_before = table.copy()
+            for elm in self.orelse:
+                elm.analyse()
         
         table3 = table.copy()
         table2 = table_stack.pop()
         table = table_stack.pop()
         for table_case in [table2,table3]:
-            for elm in table2:
+            for elm in table_case:
                 if isinstance(elm,str) and elm != IMPLICIT_PROPAGATION:
                     if elm not in table:
                         table[elm] = [create_special_vuln_case(elm,[])]
-                    for vuln_case in table2[elm]:
+                    for vuln_case in table_case[elm]:
                         if vuln_case not in table[elm]:
                             table[elm] += [vuln_case.copy()]
         
-        print("table:")
+        test_names = self.test.get_leftnames()
+        for name in test_names:
+            for vuln_case in table[name]:
+                if vuln_case['implicit'] == "yes" and vuln_case not in table[IMPLICIT_PROPAGATION]:
+                    table[IMPLICIT_PROPAGATION] += [vuln_case.copy()]
+
+        for name in body_leftnames:
+            for vuln in table[IMPLICIT_PROPAGATION]:
+                if vuln not in table[name]:
+                    table[name] += [vuln.copy()]
+
+
+
+        print_console("table:")
         for elm in table:
-            print("\t",elm,table[elm])
-        print("Output:")
+            print_console("\t",elm,table[elm])
+        print_console("Output:")
         for outt in output:
-            print("\t",outt)
+            print_console("\t",outt)
         
-        print(bcolors.OKBLUE + "----------------------------------------------------:" + bcolors.ENDC)
+        print_console(bcolors.OKBLUE + "----------------------------------------------------:" + bcolors.ENDC)
 
 
 class Compare:
@@ -504,14 +597,24 @@ class Compare:
         pass
 
     def show(self,tab):
-        print(tab*'\t',"Compare:")
+        print_console(tab*'\t',"Compare:")
         self.left.show(tab+1)
         for elm in self.comparators:
             elm.show(tab+1)
+
+    def get_leftnames(self):
+        lst = self.left.get_leftnames()
+        for elm in self.comparators:
+            lst_elm = elm.get_leftnames()
+            for name in lst_elm:
+                if name not in lst:
+                    lst.append(name)
+        return lst
     
-    
+            
+
     def analyse(self):
-        print(bcolors.OKBLUE + "Compare Node:" + bcolors.ENDC)
+        print_console(bcolors.OKBLUE + "Compare Node:" + bcolors.ENDC)
         for elm in self.comparators:
             elm.analyse()
         self.left.analyse()
@@ -525,11 +628,18 @@ class Compare:
             for elm in table[comp]:
                 if elm not in table[self]:
                     table[self] += [elm.copy()]
-        print("table:")
+        
+        lst = self.get_leftnames()
+        for elm in table[self]:
+            for name in lst:
+                if elm not in table[name]:
+                    table[name] += [elm.copy()]
+
+        print_console("table:")
         for elm in table:
-            print("\t",elm,table[elm])
+            print_console("\t",elm,table[elm])
             
-        print(bcolors.OKBLUE + "----------------------------------------------------" + bcolors.ENDC)
+        print_console(bcolors.OKBLUE + "----------------------------------------------------" + bcolors.ENDC)
 
 
         
@@ -544,12 +654,21 @@ class BinOp:
         self.own_vuln = 0
 
     def eval(self):
-        print("BinOp")
-        print(self.left)
-        print(self.right)
+        print_console("BinOp")
+        print_console(self.left)
+        print_console(self.right)
     
+    def get_leftnames(self):
+        lst = self.left.get_leftnames()
+        r_lst = self.right.get_leftnames()
+        for name in r_lst:
+            if name not in lst:
+                lst.append(name)
+        return lst
+    
+
     def show(self,tab):
-        print(tab*'\t',"BinOp:")
+        print_console(tab*'\t',"BinOp:")
         self.left.show(tab+1)
         self.right.show(tab+1)
     
@@ -574,14 +693,17 @@ class Attribute:
         self.own_vuln = 0
 
     def eval(self):
-        print("Attribute")
-        print(self.value)
-        print(self.id)
+        print_console("Attribute")
+        print_console(self.value)
+        print_console(self.id)
     
+    def get_leftnames(self):
+        lst = self.value.get_leftnames()
+
     def show(self,tab):
-        print(tab*'\t',"Attribute:")
+        print_console(tab*'\t',"Attribute:")
         self.value.show(tab+1)
-        print((tab+1)*'\t',"attr:",self.id)
+        print_console((tab+1)*'\t',"attr:",self.id)
     
     def analyse(self):
         return
@@ -596,15 +718,18 @@ class Constant:
         self.own_vuln = 0
 
     def eval(self):
-        print("Constant")
-        print(self.value)                #Not node
+        print_console("Constant")
+        print_console(self.value)                #Not node
     
+    def get_leftnames(self):
+        return []
+
     def show(self,tab):
-        print(tab*'\t',"Constant:",self.value)
+        print_console(tab*'\t',"Constant:",self.value)
     
     def analyse(self):
         table[self] = []
-        print(bcolors.OKCYAN + "Constant: " + str(self.value) + bcolors.ENDC)
+        print_console(bcolors.OKCYAN + "Constant: " + str(self.value) + bcolors.ENDC)
         
 
 
@@ -619,14 +744,17 @@ class Name:
             names += [id]
 
     def eval(self):
-        print("Name")
-        print(self.id)                #Not node
+        print_console("Name")
+        print_console(self.id)                #Not node
     
+    def get_leftnames(self):
+        return [self.id]
+
     def show(self,tab):
-        print(tab*'\t',"Name:",self.id)
+        print_console(tab*'\t',"Name:",self.id)
     
     def analyse(self):
-        print(bcolors.OKCYAN + "Name: " + str(self.id) + bcolors.ENDC)
+        print_console(bcolors.OKCYAN + "Name: " + str(self.id) + bcolors.ENDC)
         
         if self.id not in table:
              table[self.id] = [create_special_vuln_case(self.id,[])]
@@ -635,6 +763,25 @@ class Name:
 
     def getnames(self):
         return [self.id]
+
+class Break:
+    def __init__(self):
+        pass
+
+    def eval(self):
+        print_console("Break")
+    
+    def get_leftnames(self):
+        return []
+
+    def show(self,tab):
+        print_console(tab*'\t',"Break")
+    
+    def analyse(self):
+        return
+
+    def getnames(self):
+        return []
 
 
 
@@ -661,6 +808,9 @@ def construct(node):
         return Name(node["id"])
     elif node["ast_type"] == "Constant":
         return Constant(node["value"])
+    elif node["ast_type"] == "Break":
+        return Break()
     else:
+        print_console(node["ast_type"])
         sys.stderr.write("Invalid node\n")
         sys.exit(1)
