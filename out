@@ -1,0 +1,224 @@
+ Module:
+	 Assing:
+		 Name: a
+		 Call:
+			 Func:
+				 Name: b
+			 Args:
+	 If:
+		 Compare:
+			 Name: g
+			 Constant: 0
+		 Assing:
+			 Name: a
+			 Constant: 
+		 Assing:
+			 Name: d
+			 Call:
+				 Func:
+					 Name: t
+				 Args:
+		 Assing:
+			 Name: a
+			 Call:
+				 Func:
+					 Name: c
+				 Args:
+					 Name: a
+					 Name: d
+	 Expression:
+		 Call:
+			 Func:
+				 Name: e
+			 Args:
+				 Name: a
+				 Name: d
+['a', 'b', 'g', 'd', 't', 'c', 'e']
+Assign Node
+Call node:
+table:
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}]
+outputs:
+leftnames: ['a']
+table:
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}]
+Output:
+----------------------------------------------------
+If Node
+Compare Node
+Constant 0
+table:
+
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}]
+	 <ast_node.Constant object at 0x7fc5dc58f2e0> []
+Name g
+table:
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}]
+	 <ast_node.Constant object at 0x7fc5dc58f2e0> []
+	 g [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f220> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Compare object at 0x7fc5dc58f1f0> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+----------------------------------------------------
+Assign Node
+Constant 
+table:
+
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}]
+	 <ast_node.Constant object at 0x7fc5dc58f2e0> []
+	 g [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f220> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Compare object at 0x7fc5dc58f1f0> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 IMPLICIT_PROPAGATION [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f430> []
+leftnames: ['a']
+table:
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f2e0> []
+	 g [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f220> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Compare object at 0x7fc5dc58f1f0> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 IMPLICIT_PROPAGATION [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f430> []
+Output:
+	 {'name': 'B', 'source': 'g', 'sink': 'a', 'unsanitized': 'yes', 'sanitizers': [[]]}
+----------------------------------------------------
+Assign Node
+Call node:
+table:
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f2e0> []
+	 g [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f220> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Compare object at 0x7fc5dc58f1f0> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 IMPLICIT_PROPAGATION [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f430> []
+	 <ast_node.Call object at 0x7fc5dc58f550> [{'name': 'B', 'source': 't', 'sanitizers': [], 'implicit': 'no'}]
+outputs:
+	 {'name': 'B', 'source': 'g', 'sink': 'a', 'unsanitized': 'yes', 'sanitizers': [[]]}
+leftnames: ['d']
+table:
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f2e0> []
+	 g [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f220> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Compare object at 0x7fc5dc58f1f0> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 IMPLICIT_PROPAGATION [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f430> []
+	 <ast_node.Call object at 0x7fc5dc58f550> [{'name': 'B', 'source': 't', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 d [{'name': 'B', 'source': 't', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+Output:
+	 {'name': 'B', 'source': 'g', 'sink': 'a', 'unsanitized': 'yes', 'sanitizers': [[]]}
+----------------------------------------------------
+Assign Node
+Call node:
+Name a
+Name d
+table:
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f2e0> []
+	 g [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f220> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Compare object at 0x7fc5dc58f1f0> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 IMPLICIT_PROPAGATION [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f760> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 d [{'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f7c0> [{'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Call object at 0x7fc5dc58f700> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': ['c'], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': ['c'], 'implicit': 'yes'}]
+outputs:
+	 {'name': 'B', 'source': 'g', 'sink': 'a', 'unsanitized': 'yes', 'sanitizers': [[]]}
+leftnames: ['a']
+table:
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'C', 'source': 'a', 'sanitizers': ['c'], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'C', 'source': 'a', 'sanitizers': ['c'], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f2e0> []
+	 g [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f220> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Compare object at 0x7fc5dc58f1f0> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 IMPLICIT_PROPAGATION [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f760> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 d [{'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f7c0> [{'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Call object at 0x7fc5dc58f700> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': ['c'], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': ['c'], 'implicit': 'yes'}]
+Output:
+	 {'name': 'B', 'source': 'g', 'sink': 'a', 'unsanitized': 'yes', 'sanitizers': [[], ['c']]}
+	 {'name': 'B', 'source': 'd', 'sink': 'a', 'unsanitized': 'no', 'sanitizers': [['c']]}
+----------------------------------------------------
+table:
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'C', 'source': 'a', 'sanitizers': ['c'], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'C', 'source': 'a', 'sanitizers': ['c'], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f2e0> []
+	 g [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f220> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Compare object at 0x7fc5dc58f1f0> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 IMPLICIT_PROPAGATION [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 d [{'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'B', 'source': 't', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+Output:
+	 {'name': 'B', 'source': 'g', 'sink': 'a', 'unsanitized': 'yes', 'sanitizers': [[], ['c']]}
+	 {'name': 'B', 'source': 'd', 'sink': 'a', 'unsanitized': 'no', 'sanitizers': [['c']]}
+----------------------------------------------------
+Expr node:
+Call node:
+Name a
+Name d
+table:
+	 <ast_node.Call object at 0x7fc5dc58f100> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'C', 'source': 'a', 'sanitizers': ['c'], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 a [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'C', 'source': 'a', 'sanitizers': ['c'], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Constant object at 0x7fc5dc58f2e0> []
+	 g [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f220> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Compare object at 0x7fc5dc58f1f0> [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 IMPLICIT_PROPAGATION [{'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 d [{'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'B', 'source': 't', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f910> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'C', 'source': 'a', 'sanitizers': ['c'], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Name object at 0x7fc5dc58f970> [{'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'B', 'source': 't', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}]
+	 <ast_node.Call object at 0x7fc5dc58f880> [{'name': 'A', 'source': 'b', 'sanitizers': [], 'implicit': 'no'}, {'name': 'C', 'source': 'a', 'sanitizers': [], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'C', 'source': 'a', 'sanitizers': ['c'], 'implicit': 'no'}, {'name': 'especial_vuln_case', 'source': 'g', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': ['c'], 'implicit': 'yes'}, {'name': 'especial_vuln_case', 'source': 'd', 'sanitizers': [], 'implicit': 'yes'}, {'name': 'B', 'source': 't', 'sanitizers': [], 'implicit': 'no'}]
+outputs:
+	 {'name': 'B', 'source': 'g', 'sink': 'a', 'unsanitized': 'yes', 'sanitizers': [[], ['c']]}
+	 {'name': 'B', 'source': 'd', 'sink': 'a', 'unsanitized': 'no', 'sanitizers': [['c']]}
+	 {'name': 'A', 'source': 'b', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [[]]}
+	 {'name': 'A', 'source': 'g', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [[], ['c']]}
+	 {'name': 'A', 'source': 'd', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [['c'], []]}
+	 {'name': 'C', 'source': 'a', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [[], ['c']]}
+	 {'name': 'C', 'source': 'g', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [[], ['c']]}
+	 {'name': 'C', 'source': 'd', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [['c'], []]}
+##############################################################################################
+table:
+
+	 <ast_node.Call object at 0x7fc5dc58f100>
+	 a
+	 <ast_node.Constant object at 0x7fc5dc58f2e0>
+	 g
+	 <ast_node.Name object at 0x7fc5dc58f220>
+	 <ast_node.Compare object at 0x7fc5dc58f1f0>
+	 IMPLICIT_PROPAGATION
+	 <ast_node.Constant object at 0x7fc5dc58f430>
+	 <ast_node.Call object at 0x7fc5dc58f550>
+	 d
+##############################################################################################
+{'A': <ast_node.Vulnerability object at 0x7fc5dc58fa90>, 'B': <ast_node.Vulnerability object at 0x7fc5dc58fac0>, 'C': <ast_node.Vulnerability object at 0x7fc5dc58fb20>}
+##############################################################################################
+{'name': 'B', 'source': 'g', 'sink': 'a', 'unsanitized': 'yes', 'sanitizers': [[], ['c']]}
+{'name': 'B', 'source': 'd', 'sink': 'a', 'unsanitized': 'no', 'sanitizers': [['c']]}
+{'name': 'A', 'source': 'b', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [[]]}
+{'name': 'A', 'source': 'g', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [[], ['c']]}
+{'name': 'A', 'source': 'd', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [['c'], []]}
+{'name': 'C', 'source': 'a', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [[], ['c']]}
+{'name': 'C', 'source': 'g', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [[], ['c']]}
+{'name': 'C', 'source': 'd', 'sink': 'e', 'unsanitized': 'yes', 'sanitizers': [['c'], []]}
+##############################################################################################
+{"vulnerability": "B_1", "source": "g", "sink": "a", "unsanitized flows": "yes", "sanitized flows": [["c"]]}
+{"vulnerability": "B_2", "source": "d", "sink": "a", "unsanitized flows": "no", "sanitized flows": [["c"]]}
+{"vulnerability": "A_1", "source": "b", "sink": "e", "unsanitized flows": "yes", "sanitized flows": []}
+{"vulnerability": "A_2", "source": "g", "sink": "e", "unsanitized flows": "yes", "sanitized flows": [["c"]]}
+{"vulnerability": "A_3", "source": "d", "sink": "e", "unsanitized flows": "yes", "sanitized flows": [["c"]]}
+{"vulnerability": "C_1", "source": "a", "sink": "e", "unsanitized flows": "yes", "sanitized flows": [["c"]]}
+{"vulnerability": "C_2", "source": "g", "sink": "e", "unsanitized flows": "yes", "sanitized flows": [["c"]]}
+{"vulnerability": "C_3", "source": "d", "sink": "e", "unsanitized flows": "yes", "sanitized flows": [["c"]]}

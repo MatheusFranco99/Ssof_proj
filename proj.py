@@ -1,3 +1,4 @@
+from concurrent.futures import process
 import sys, ast, json
 from ast_node import *
 
@@ -39,8 +40,9 @@ def process_output(output):
         sanitized = flow["sanitizers"]
         sanitized = [ele for ele in sanitized if ele != []]
         processed_output += [{"vulnerability": vuln, "source": source, "sink": sink, "unsanitized flows": option, "sanitized flows": sanitized}]
+    # print(str(processed_output).replace('\'','\"'))
     for out in processed_output:
-        print(out)
+        print(str(out).replace('\'','\"'))
 
 
 def usage():

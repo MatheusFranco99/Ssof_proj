@@ -9,6 +9,17 @@ tainted = {'name_var':{'source':s, 'unsunitized_flow':y/n, 'sanitized'=[]}}
 
 """
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 class Vulnerability:
     def __init__(self, name, sources, sanitizers, sinks, implicit):
         self.name = name
@@ -41,14 +52,24 @@ table = {}
 vuln = {}
 output = []
 
+table_stack = []
+
+IMPLICIT_PROPAGATION = 'IMPLICIT_PROPAGATION'
+
 def create_output_case(name,source, sink, unsanitized, sanitizers):
     global output
-    output += [{'name': name, 'source': source, 'sink': sink, 'unsanitized': unsanitized, 'sanitizers': [sanitizers.copy()]}]
+    if sanitizers == []:
+        output += [{'name': name, 'source': source, 'sink': sink, 'unsanitized': unsanitized, 'sanitizers': []}]
+    else:
+        output += [{'name': name, 'source': source, 'sink': sink, 'unsanitized': unsanitized, 'sanitizers': [sanitizers.copy()]}]
 
 def add_output(vuln_case, vuln_pattern,sink):
     name = vuln_pattern.name
     source = vuln_case['source']
-    sanitizers = vuln_case['sanitizers'].copy()
+    sanitizers = []
+    for snt in vuln_case['sanitizers']:
+        if snt in vuln_pattern.sanitizers:
+            sanitizers.append(snt)
     unsanitized = 'yes'
     if sanitizers != []:
         unsanitized = 'no'
@@ -61,7 +82,7 @@ def add_output(vuln_case, vuln_pattern,sink):
             if outt['unsanitized'] != unsanitized:
                 outt['unsanitized'] = 'yes'
             
-            if sanitizers not in outt['sanitizers']:
+            if sanitizers != [] and sanitizers not in outt['sanitizers']:
                 outt['sanitizers'] += [sanitizers]
             
             return
@@ -121,6 +142,12 @@ class Module:
         
         for elm in self.body:
             elm.analyse()
+            to_pop = []
+            for elm in table:
+                if(not isinstance(elm,str)):
+                    to_pop += [elm]
+            for elm in to_pop:
+                del table[elm]
 
     def getnames(self):
         names = []
@@ -142,9 +169,10 @@ class Expr:
         print(tab*'\t',"Expression:")
         self.value.show(tab+1)
 
+
     def analyse(self):
         
-        print("Expr node:")
+        print(bcolors.OKBLUE+"Expr node:"+bcolors.ENDC)
         global names,table,output
         self.value.analyse()
         
@@ -181,16 +209,9 @@ class Call:
 
         global vuln
         
-        print("Call node:")
+        print(bcolors.OKBLUE + "Call node:" + bcolors.ENDC)
         for elm in self.args:
             elm.analyse()
-            
-        
-
-    
-        print("table:\n")
-        for elm in table:
-            print("\t",elm,table[elm])
 
         table[self] = []
         for elm in self.args:
@@ -213,18 +234,10 @@ class Call:
                     if is_instance_vuln(vuln_case,vuln[vuln_pattern]):
                         add_output(vuln_case,vuln[vuln_pattern],self.func.id)
 
-        print("SANITIZER",self.func.id)
 
         # sanitizer
         for vuln_pattern in vuln:
             if(self.func.id in vuln[vuln_pattern].sanitizers):
-                print("FOUND",vuln[vuln_pattern])
-                print("\t\t\ttable:")
-                for elm in table:
-                    print("\t\t\t\t",elm,table[elm])
-                print("\t\t\toutputs:")
-                for outt in output:
-                    print("\t\t\t\t",outt)
                 for i in range(len(table[self])):
                     if is_instance_vuln(table[self][i],vuln[vuln_pattern]):
                         #add_sanitizer(vuln_case,self.func.id)
@@ -239,6 +252,7 @@ class Call:
         print("outputs:")
         for outt in output:
             print("\t",outt)
+        print(bcolors.OKBLUE + "---------------------------------------" + bcolors.ENDC)
         
 
 class Assign:
@@ -263,8 +277,7 @@ class Assign:
         self.value.show(tab+1)
     
     def analyse(self):
-        
-        print("Assign Node")
+        print(bcolors.OKBLUE + "Assign node:" + bcolors.ENDC)
         self.value.analyse()
 
         leftnames = []
@@ -274,11 +287,18 @@ class Assign:
         print("leftnames:",leftnames)
 
         for name in leftnames:
-            table[name] = table[self.value].copy()
+            if name not in table:
+                table[name] = table[self.value]
+            else:
+                for elm in table[self.value]:
+                    if elm not in table[name]:
+                        table[name] += [elm.copy()]
+        
+        # if IMPLICIT_PROPAGATION in table:
+        #     for name in leftnames:
+        #         for implicit_vuln in table[IMPLICIT_PROPAGATION]:
+        #             table[name] += [implicit_vuln.copy()]
 
-        print("table:")
-        for elm in table:
-            print("\t",elm,table[elm])
 
         for name in leftnames:
             # source
@@ -292,7 +312,7 @@ class Assign:
             for vuln_pattern in vuln:
                 if(name in vuln[vuln_pattern].sinks):
                     for vuln_case in table[name]:
-                        if is_instance_vuln(vuln_case,vuln[vuln_pattern]):
+                        if is_instance_vuln(vuln_case,vuln[vuln_pattern]) and vuln_case['source'] != name:
                             add_output(vuln_case,vuln[vuln_pattern],name)
 
             # sanitizer
@@ -308,8 +328,8 @@ class Assign:
             print("\t",elm,table[elm])
         print("Output:")
         for outt in output:
-            print(outt)
-        print("----------------------------------------------------")
+            print("\t",outt)
+        print(bcolors.OKBLUE + "----------------------------------------------------:" + bcolors.ENDC)
 
 class If:
     def __init__(self, test, body, orelse):
@@ -340,9 +360,53 @@ class If:
             elm.show(tab+1)
     
     def analyse(self):
+        print(bcolors.OKBLUE + "If node:" + bcolors.ENDC)
+        global table
+
         self.test.analyse()
-        self.body.analyse()
-        self.orelse.analyse()
+
+        if IMPLICIT_PROPAGATION not in table:
+            table[IMPLICIT_PROPAGATION] = []
+        for elm in table[self.test]:
+            if(elm['implicit'] == 'yes' and elm not in table[IMPLICIT_PROPAGATION]):
+                table[IMPLICIT_PROPAGATION] += [elm]
+    
+        table_stack.append(table.copy())
+
+        for elm in self.body:
+            elm.analyse()
+        
+        previous_table = table_stack.pop()
+        table_stack.append(previous_table)
+        table_stack.append(table.copy())
+
+        table = previous_table.copy()
+
+        for elm in self.orelse:
+            elm.analyse()
+        
+        table3 = table.copy()
+        table2 = table_stack.pop()
+        table = table_stack.pop()
+        for table_case in [table2,table3]:
+            for elm in table_case:
+                if isinstance(elm,str) and elm != IMPLICIT_PROPAGATION:
+                    if elm not in table:
+                        table[elm] = [create_special_vuln_case(elm,[])]
+                    for vuln_case in table_case[elm]:
+                        if vuln_case not in table[elm]:
+                            table[elm] += [vuln_case.copy()]
+        
+        print("table:")
+        for elm in table:
+            print("\t",elm,table[elm])
+        print("Output:")
+        for outt in output:
+            print("\t",outt)
+        
+        print(bcolors.OKBLUE + "----------------------------------------------------:" + bcolors.ENDC)
+
+
 
 class While:
     def __init__(self, test, body, orelse):
@@ -373,9 +437,53 @@ class While:
             elm.show(tab+1)
     
     def analyse(self):
+        
+        print(bcolors.OKBLUE + "While Node:" + bcolors.ENDC)
+        global table
+
         self.test.analyse()
-        self.body.analyse()
-        self.orelse.analyse()
+
+        if IMPLICIT_PROPAGATION not in table:
+            table[IMPLICIT_PROPAGATION] = []
+        for elm in table[self.test]:
+            if(elm['implicit'] == 'yes' and elm not in table[IMPLICIT_PROPAGATION]):
+                table[IMPLICIT_PROPAGATION] += [elm]
+    
+        table_stack.append(table.copy())
+
+        for elm in self.body:
+            elm.analyse()
+        
+        previous_table = table_stack.pop()
+        table_stack.append(previous_table)
+        table_stack.append(table.copy())
+
+        table = previous_table.copy()
+
+        for elm in self.orelse:
+            elm.analyse()
+        
+        table3 = table.copy()
+        table2 = table_stack.pop()
+        table = table_stack.pop()
+        for table_case in [table2,table3]:
+            for elm in table2:
+                if isinstance(elm,str) and elm != IMPLICIT_PROPAGATION:
+                    if elm not in table:
+                        table[elm] = [create_special_vuln_case(elm,[])]
+                    for vuln_case in table2[elm]:
+                        if vuln_case not in table[elm]:
+                            table[elm] += [vuln_case.copy()]
+        
+        print("table:")
+        for elm in table:
+            print("\t",elm,table[elm])
+        print("Output:")
+        for outt in output:
+            print("\t",outt)
+        
+        print(bcolors.OKBLUE + "----------------------------------------------------:" + bcolors.ENDC)
+
 
 class Compare:
     def __init__(self, left, comparators):
@@ -397,8 +505,28 @@ class Compare:
             elm.show(tab+1)
     
     
-    def analyse():
-        pass
+    def analyse(self):
+        print(bcolors.OKBLUE + "Compare Node:" + bcolors.ENDC)
+        for elm in self.comparators:
+            elm.analyse()
+        self.left.analyse()
+    
+        table[self] = []
+        for elm in table[self.left]:
+            if elm not in table[self]:
+                table[self] += [elm.copy()]
+        
+        for comp in self.comparators:
+            for elm in table[comp]:
+                if elm not in table[self]:
+                    table[self] += [elm.copy()]
+        print("table:")
+        for elm in table:
+            print("\t",elm,table[elm])
+            
+        print(bcolors.OKBLUE + "----------------------------------------------------" + bcolors.ENDC)
+
+
         
         
 
@@ -470,11 +598,9 @@ class Constant:
         print(tab*'\t',"Constant:",self.value)
     
     def analyse(self):
-        print("Constant Name", self.value)
         table[self] = []
-        print("table:\n")
-        for elm in table:
-            print("\t",elm,table[elm])
+        print(bcolors.OKCYAN + "Constant: " + str(self.value) + bcolors.ENDC)
+        
 
 
 class Name:
@@ -495,7 +621,8 @@ class Name:
         print(tab*'\t',"Name:",self.id)
     
     def analyse(self):
-        print("Node Name", self.id)
+        print(bcolors.OKCYAN + "Name: " + str(self.id) + bcolors.ENDC)
+        
         if self.id not in table:
              table[self.id] = [create_special_vuln_case(self.id,[])]
         table[self] = table[self.id].copy()
