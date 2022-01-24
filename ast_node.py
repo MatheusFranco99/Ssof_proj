@@ -56,6 +56,8 @@ table_stack = []
 
 IMPLICIT_PROPAGATION = 'IMPLICIT_PROPAGATION'
 
+IN_COMPARE_FLAG = False
+
 def print_console(*argv):
     # uniq = ""
     # for arg in argv:
@@ -103,7 +105,17 @@ def is_special_vuln(vuln_case):
     return vuln_case['name'] == 'especial_vuln_case'
        
 def create_special_vuln_case(source,sanitizers):
-    return {'name': 'especial_vuln_case', 'source': source, 'sanitizers': sanitizers.copy(), 'implicit': 'yes'}
+    lst_vulns = []
+    if not IN_COMPARE_FLAG:
+        for vuln_pattern in vuln:
+            lst_vulns += [{'name':vuln[vuln_pattern].name,'source': source,'sanitizers': sanitizers.copy(), 'implicit':vuln[vuln_pattern].implicit}]
+    else:
+        for vuln_pattern in vuln:
+            if vuln[vuln_pattern].implicit == 'yes':
+                lst_vulns += [{'name':vuln[vuln_pattern].name,'source': source,'sanitizers': sanitizers.copy(), 'implicit':vuln[vuln_pattern].implicit}]
+
+    return lst_vulns
+    # return {'name': 'especial_vuln_case', 'source': source, 'sanitizers': sanitizers.copy(), 'implicit': 'yes'}
      
 def create_vuln_case(name,source,sanitizers,implicit):
     return {'name': name, 'source': source, 'sanitizers': sanitizers.copy(), 'implicit': implicit}
@@ -400,36 +412,70 @@ class If:
 
         self.test.analyse()
 
+        # cria lista com vulnerabilidades implicitas do teste
         if IMPLICIT_PROPAGATION not in table:
             table[IMPLICIT_PROPAGATION] = []
         for elm in table[self.test]:
             if(elm['implicit'] == 'yes' and elm not in table[IMPLICIT_PROPAGATION]):
                 table[IMPLICIT_PROPAGATION] += [elm]
     
+        # empurra tabela atual pra pilha
         table_stack.append(table.copy())
 
+        
+        # pega todas as variaveis assigned no body (para propagar vuln implicitas)
         body_leftnames = []
-        for elm in self.body + self.orelse:
+        for elm in self.body:
             lst = elm.get_leftnames()
             for name in lst:
                 if name not in body_leftnames:
                     body_leftnames.append(name)
+                if name not in table:
+                    table[name] = []
 
+        # add vuln implicitas as variaveis assgined no body
+        for name in body_leftnames:
+            for vuln in table[IMPLICIT_PROPAGATION]:
+                if vuln['implicit'] == 'yes' and vuln not in table[name]:
+                    table[name] += [vuln.copy()]
+
+        # run body
         for elm in self.body:
             elm.analyse()
         
-        previous_table = table_stack.pop()
-        table_stack.append(previous_table)
+        # else
+
+        # atualiza as tabelas e a pilha
         table_stack.append(table.copy())
 
-        table = previous_table.copy()
+        table = table_stack[-2].copy() # tabela (antes do if-body) para comecar o else
 
+        
+        # pega todas as variaveis assigned no orelse (para propagar vuln implicitas)
+        orelse_leftnames = []
+        for elm in self.orelse:
+            lst = elm.get_leftnames()
+            for name in lst:
+                if name not in orelse_leftnames:
+                    orelse_leftnames.append(name)
+                if name not in table:
+                    table[name] = []
+
+        # add vuln implicitas as variaveis assgined no body
+        for name in orelse_leftnames:
+            for vuln in table[IMPLICIT_PROPAGATION]:
+                if vuln['implicit'] == 'yes' and vuln not in table[name]:
+                    table[name] += [vuln.copy()]
+
+        # run orelse
         for elm in self.orelse:
             elm.analyse()
         
-        table3 = table.copy()
-        table2 = table_stack.pop()
-        table = table_stack.pop()
+        table3 = table.copy() # orelse table
+        table2 = table_stack.pop() # if-body table
+        table = table_stack.pop() # pre if + test table
+
+        # add, na tabela atual, vulnerabilidades adicionadas a cada variavel dentro do if
         for table_case in [table2,table3]:
             for elm in table_case:
                 if isinstance(elm,str) and elm != IMPLICIT_PROPAGATION:
@@ -437,22 +483,32 @@ class If:
                     if elm not in table:
                         # check if in both
                         if not (elm in table2 and elm in table3):
-                            table[elm] = [create_special_vuln_case(elm,[])]
+                            table[elm] = create_special_vuln_case(elm,[])
                         else:
                             table[elm] = []
+                    # add vuln found in body and in orelse
                     for vuln_case in table_case[elm]:
                         if vuln_case not in table[elm]:
                             table[elm] += [vuln_case.copy()]
        
+        
+        # recalcula vuln implicitas no test (caso em que variaveis do compare sao mudadas no body)
         test_names = self.test.get_leftnames()
         for name in test_names:
             for vuln_case in table[name]:
                 if vuln_case['implicit'] == "yes" and vuln_case not in table[IMPLICIT_PROPAGATION]:
                     table[IMPLICIT_PROPAGATION] += [vuln_case.copy()]
 
-        for name in body_leftnames:
+        # constroi a lista de todos os leftnames
+        all_leftnames = body_leftnames
+        for name in orelse_leftnames:
+            if name not in all_leftnames:
+                all_leftnames += [name]
+
+        # adiciona vuln implicitas as variaveis assigned no if
+        for name in all_leftnames:
             for vuln in table[IMPLICIT_PROPAGATION]:
-                if vuln not in table[name]:
+                if vuln['implicit'] == 'yes' and vuln not in table[name]:
                     table[name] += [vuln.copy()]
 
 
@@ -509,66 +565,152 @@ class While:
         print_console(bcolors.OKBLUE + "While Node:" + bcolors.ENDC)
         global table
 
+
         self.test.analyse()
 
+        # cria lista com vulnerabilidades implicitas do teste
         if IMPLICIT_PROPAGATION not in table:
             table[IMPLICIT_PROPAGATION] = []
         for elm in table[self.test]:
             if(elm['implicit'] == 'yes' and elm not in table[IMPLICIT_PROPAGATION]):
                 table[IMPLICIT_PROPAGATION] += [elm]
     
+        # empurra tabela atual pra pilha
         table_stack.append(table.copy())
 
+        # pega todas as variaveis assigned no body (para propagar vuln implicitas)
         body_leftnames = []
-        for elm in self.body + self.orelse:
+        for elm in self.body:
             lst = elm.get_leftnames()
             for name in lst:
                 if name not in body_leftnames:
                     body_leftnames.append(name)
+                if name not in table:
+                    table[name] = []
+
+        # add vuln implicitas as variaveis assgined no body
+        for name in body_leftnames:
+            for vuln in table[IMPLICIT_PROPAGATION]:
+                if vuln['implicit'] == 'yes' and vuln not in table[name]:
+                    table[name] += [vuln.copy()]
+
+
 
         table_before = table.copy()
+        # run body
         for elm in self.body:
             elm.analyse()
+        # run body enquanto tabela de variaveis mudar
         while (table_before != table):
+            
+            difs = []
+            for elm in table:
+                if elm not in table_before:
+                    difs += []
+            for elm in table_before:
+                if elm not in table:
+                    difs += []
+        
+            if(difs == []):
+                break
+
             table_before = table.copy()
+
+            # recalcula vuln implicitas no test (caso em que variaveis do compare sao mudadas no body)
+            test_names = self.test.get_leftnames()
+            for name in test_names:
+                for vuln_case in table[name]:
+                    if vuln_case['implicit'] == "yes" and vuln_case not in table[IMPLICIT_PROPAGATION]:
+                        table[IMPLICIT_PROPAGATION] += [vuln_case.copy()]
+            # add vuln implicitas as variaveis assgined no body
+            for name in body_leftnames:
+                for vuln in table[IMPLICIT_PROPAGATION]:
+                    if vuln['implicit'] == 'yes' and vuln not in table[name]:
+                        table[name] += [vuln.copy()]
+
+
             for elm in self.body:
                 elm.analyse()
         
-        previous_table = table_stack.pop()
-        table_stack.append(previous_table)
+        # else
+
+        # atualiza as tabelas e a pilha
         table_stack.append(table.copy())
 
-        table = previous_table.copy()
+        table = table_stack[-2].copy() # tabela (antes do if-body) para comecar o else
+
+        # pega todas as variaveis assigned no orelse (para propagar vuln implicitas)
+        orelse_leftnames = []
+        for elm in self.orelse:
+            lst = elm.get_leftnames()
+            for name in lst:
+                if name not in orelse_leftnames:
+                    orelse_leftnames.append(name)
+                if name not in table:
+                    table[name] = []
+
+        # add vuln implicitas as variaveis assgined no body
+        for name in orelse_leftnames:
+            for vuln in table[IMPLICIT_PROPAGATION]:
+                if vuln['implicit'] == 'yes' and vuln not in table[name]:
+                    table[name] += [vuln.copy()]
+
+
 
         table_before = table.copy()
+        # run orelse
         for elm in self.orelse:
             elm.analyse()
+        # run orelse enquanto tabela de variaveis mudar
         while (table_before != table):
             table_before = table.copy()
+            # recalcula vuln implicitas no test (caso em que variaveis do compare sao mudadas no body)
+            test_names = self.test.get_leftnames()
+            for name in test_names:
+                for vuln_case in table[name]:
+                    if vuln_case['implicit'] == "yes" and vuln_case not in table[IMPLICIT_PROPAGATION]:
+                        table[IMPLICIT_PROPAGATION] += [vuln_case.copy()]
+            # add vuln implicitas as variaveis assgined no body
+            for name in orelse_leftnames:
+                for vuln in table[IMPLICIT_PROPAGATION]:
+                    if vuln['implicit'] == 'yes' and vuln not in table[name]:
+                        table[name] += [vuln.copy()]
+
             for elm in self.orelse:
                 elm.analyse()
         
-        table3 = table.copy()
-        table2 = table_stack.pop()
-        table = table_stack.pop()
+        table3 = table.copy() # orelse table
+        table2 = table_stack.pop() # if-body table
+        table = table_stack.pop() # pre if + test table
+
+        # add, na tabela atual, vulnerabilidades adicionadas a cada variavel dentro do while
         for table_case in [table2,table3]:
             for elm in table_case:
+                # verifica se e uma variavel
                 if isinstance(elm,str) and elm != IMPLICIT_PROPAGATION:
                     if elm not in table:
-                        table[elm] = [create_special_vuln_case(elm,[])]
+                        table[elm] = create_special_vuln_case(elm,[])
                     for vuln_case in table_case[elm]:
                         if vuln_case not in table[elm]:
                             table[elm] += [vuln_case.copy()]
         
+        # recalcula vuln implicitas no test (caso em que variaveis do compare sao mudadas no body)
         test_names = self.test.get_leftnames()
         for name in test_names:
             for vuln_case in table[name]:
                 if vuln_case['implicit'] == "yes" and vuln_case not in table[IMPLICIT_PROPAGATION]:
                     table[IMPLICIT_PROPAGATION] += [vuln_case.copy()]
 
-        for name in body_leftnames:
+        # constroi a lista de todos os leftnames
+        all_leftnames = body_leftnames
+        for name in orelse_leftnames:
+            if name not in all_leftnames:
+                all_leftnames += [name]
+        
+        # adiciona vuln implicitas as variaveis assigned no while
+        for name in all_leftnames:
             for vuln in table[IMPLICIT_PROPAGATION]:
-                if vuln not in table[name]:
+                if vuln['implicit'] == 'yes' and vuln not in table[name]:
                     table[name] += [vuln.copy()]
 
 
@@ -614,6 +756,9 @@ class Compare:
             
 
     def analyse(self):
+
+        IN_COMPARE_FLAG = True
+
         print_console(bcolors.OKBLUE + "Compare Node:" + bcolors.ENDC)
         for elm in self.comparators:
             elm.analyse()
@@ -629,11 +774,11 @@ class Compare:
                 if elm not in table[self]:
                     table[self] += [elm.copy()]
         
-        lst = self.get_leftnames()
-        for elm in table[self]:
-            for name in lst:
-                if elm not in table[name]:
-                    table[name] += [elm.copy()]
+        # lst = self.get_leftnames()
+        # for elm in table[self]:
+        #     for name in lst:
+        #         if elm not in table[name]:
+        #             table[name] += [elm.copy()]
 
         print_console("table:")
         for elm in table:
@@ -641,7 +786,7 @@ class Compare:
             
         print_console(bcolors.OKBLUE + "----------------------------------------------------" + bcolors.ENDC)
 
-
+        IN_COMPARE_FLAG = False
         
         
 
@@ -757,7 +902,7 @@ class Name:
         print_console(bcolors.OKCYAN + "Name: " + str(self.id) + bcolors.ENDC)
         
         if self.id not in table:
-             table[self.id] = [create_special_vuln_case(self.id,[])]
+             table[self.id] = create_special_vuln_case(self.id,[])
         table[self] = table[self.id].copy()
         return
 

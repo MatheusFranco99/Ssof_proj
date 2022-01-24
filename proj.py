@@ -40,9 +40,9 @@ def process_output(output):
         sanitized = flow["sanitizers"]
         sanitized = [ele for ele in sanitized if ele != []]
         processed_output += [{"vulnerability": vuln, "source": source, "sink": sink, "unsanitized flows": option, "sanitized flows": sanitized}]
-    # print(str(processed_output).replace('\'','\"'))
-    for out in processed_output:
-        print(str(out).replace('\'','\"'))
+    print(str(processed_output).replace('\'','\"'))
+    # for out in processed_output:
+    #     print(str(out).replace('\'','\"'))
 
 
 def usage():
@@ -94,22 +94,22 @@ if __name__ == '__main__':
     ast = construct(json_dicti)
 
     ast.show()
-    print(names)
+    # print(names)
 
     
 
     ast.analyse(dictionary)
     
-    print("##############################################################################################")
-    print("table:\n")
-    for elm in table:
-        print("\t",elm)
-    print("##############################################################################################")
-    print(vuln)
-    print("##############################################################################################")
-    for outt in output:
-        print(outt)
-    print("##############################################################################################")
+    # print("##############################################################################################")
+    # print("table:\n")
+    # for elm in table:
+    #     print("\t",elm)
+    # print("##############################################################################################")
+    # print(vuln)
+    # print("##############################################################################################")
+    # for outt in output:
+    #     print(outt)
+    # print("##############################################################################################")
     process_output(output)
 
     """tree = ast.parse(text)

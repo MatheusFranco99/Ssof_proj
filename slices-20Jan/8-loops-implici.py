@@ -5,6 +5,25 @@ while (i == a) :
    i = t(i)
 w(s("oi",c))
 
+b -> {A,b}
+a -> {A,b}
+
+c -> None
+
+i -> {A,i}
+a -> {A,b}
+
+c -> None
+
+i -> {A,i}
+t(i) -> {A,i} ++ {A,i,t}
+i -> {A,i}
+
+
+c,i += {A,i} {A,b}
+
+
+
 # tip: while loops can encode implicit flows
 
 # [  {"vulnerability": "A",   "sources": ["b"],  
