@@ -106,13 +106,8 @@ def is_special_vuln(vuln_case):
        
 def create_special_vuln_case(source,sanitizers):
     lst_vulns = []
-    if not IN_COMPARE_FLAG:
-        for vuln_pattern in vuln:
-            lst_vulns += [{'name':vuln[vuln_pattern].name,'source': source,'sanitizers': sanitizers.copy(), 'implicit':vuln[vuln_pattern].implicit}]
-    else:
-        for vuln_pattern in vuln:
-            if vuln[vuln_pattern].implicit == 'yes':
-                lst_vulns += [{'name':vuln[vuln_pattern].name,'source': source,'sanitizers': sanitizers.copy(), 'implicit':vuln[vuln_pattern].implicit}]
+    for vuln_pattern in vuln:
+        lst_vulns += [{'name':vuln[vuln_pattern].name,'source': source,'sanitizers': sanitizers.copy(), 'implicit':vuln[vuln_pattern].implicit}]
 
     return lst_vulns
     # return {'name': 'especial_vuln_case', 'source': source, 'sanitizers': sanitizers.copy(), 'implicit': 'yes'}
@@ -323,7 +318,7 @@ class Assign:
         print_console("leftnames:",leftnames)
 
         for name in leftnames:
-            table[name] = table[self.value]
+            table[name] = table[self.value].copy()
             # if name not in table:
             #     table[name] = table[self.value]
             # else:
@@ -481,7 +476,7 @@ class If:
                 if isinstance(elm,str) and elm != IMPLICIT_PROPAGATION:
                     
                     if elm not in table:
-                        # check if in both
+                        # check if not in both
                         if not (elm in table2 and elm in table3):
                             table[elm] = create_special_vuln_case(elm,[])
                         else:
@@ -602,14 +597,22 @@ class While:
             elm.analyse()
         # run body enquanto tabela de variaveis mudar
         while (table_before != table):
-            
+            print_console("----------------------------")
+            print_console("table_before:")
+            for elm in table_before:
+                print_console("\t",elm,table_before[elm])
+            print_console("table:")
+            for elm in table:
+                print_console("\t",elm,table[elm])
+            print_console("----------------------------")
+
             difs = []
             for elm in table:
-                if elm not in table_before:
-                    difs += []
+                if elm not in table_before or table[elm] != table_before[elm]:
+                    difs += [elm]
             for elm in table_before:
-                if elm not in table:
-                    difs += []
+                if elm not in table or table_before[elm] != table[elm]:
+                    difs += [elm]
         
             if(difs == []):
                 break
@@ -621,12 +624,12 @@ class While:
             for name in test_names:
                 for vuln_case in table[name]:
                     if vuln_case['implicit'] == "yes" and vuln_case not in table[IMPLICIT_PROPAGATION]:
-                        table[IMPLICIT_PROPAGATION] += [vuln_case.copy()]
+                        table[IMPLICIT_PROPAGATION] = table[IMPLICIT_PROPAGATION].copy() + [vuln_case.copy()]
             # add vuln implicitas as variaveis assgined no body
             for name in body_leftnames:
                 for vuln in table[IMPLICIT_PROPAGATION]:
                     if vuln['implicit'] == 'yes' and vuln not in table[name]:
-                        table[name] += [vuln.copy()]
+                        table[name] = table[name].copy() + [vuln.copy()]
 
 
             for elm in self.body:
@@ -667,10 +670,10 @@ class While:
             difs = []
             for elm in table:
                 if elm not in table_before:
-                    difs += []
+                    difs += [elm]
             for elm in table_before:
                 if elm not in table:
-                    difs += []
+                    difs += [elm]
         
             if(difs == []):
                 break
@@ -770,7 +773,7 @@ class Compare:
             
 
     def analyse(self):
-
+        global IN_COMPARE_FLAG
         IN_COMPARE_FLAG = True
 
         print_console(bcolors.OKBLUE + "Compare Node:" + bcolors.ENDC)
